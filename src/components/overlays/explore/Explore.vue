@@ -49,8 +49,8 @@
                 <q-chip square clickable color="white" text-color="purple" :outline="filterType!=''" @click="setFilterType('')">
                     All
                 </q-chip>
-                <q-chip square clickable color="white" text-color="purple" :outline="filterType!='favourite'" @click="setFilterType('favourite')">
-                    Favourites
+                <q-chip square clickable color="white" text-color="purple" :outline="filterType!='favorite'" @click="setFilterType('favorite')">
+                    Favorites
                 </q-chip>
                 <q-chip square clickable color="white" text-color="purple" :outline="filterType!='populated'" @click="setFilterType('populated')">
                     Populated
@@ -66,7 +66,10 @@
                         </q-item-section>
 
                         <q-item-section top>
-                            <q-item-label lines="1">{{ place.name }}</q-item-label>
+                            <q-item-label lines="1">
+                                {{ place.name }}
+                                <q-icon :name="place.favorite ? 'favorite' : 'favorite_border'" size="xs" class="float-right" clickable @click.stop="togglefavorite(place)"/>
+                            </q-item-label>
                             <q-item-label caption lines="1">{{ place.description }}</q-item-label>
                         </q-item-section>
 
@@ -121,9 +124,9 @@ export default {
             });
 
             switch (this.filterType) {
-            case 'favourite':
+            case 'favorite':
                 returnData = returnData.filter((item) => {
-                    return (item.favourite);
+                    return (item.favorite);
                 });
                 break;
             case 'populated':
@@ -179,8 +182,9 @@ export default {
             this.filterType = type;
         },
 
-        toggleFavourite (place) {
-            alert('Not currently implemented: Show details - ' + place.name);
+        togglefavorite (place) {
+            // TODO: store favourite selections to the local storage
+            place.favorite = !place.favorite;
         }
     },
 
