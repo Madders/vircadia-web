@@ -12,6 +12,12 @@
     .q-field {
         background-color: rgba(0, 0, 0, 0.4);
     }
+    .explore-place-item-imagebg {
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        text-shadow : -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black, 0 0 10px black;
+    }
 </style>
 
 <template>
@@ -52,6 +58,9 @@
                 <q-chip square clickable color="white" text-color="purple" :outline="filterType!='favorite'" @click="setFilterType('favorite')">
                     Favorites
                 </q-chip>
+                <q-chip square clickable color="white" text-color="purple" :outline="filterType!='active'" @click="setFilterType('active')">
+                    Active
+                </q-chip>
                 <q-chip square clickable color="white" text-color="purple" :outline="filterType!='populated'" @click="setFilterType('populated')">
                     Populated
                 </q-chip>
@@ -60,7 +69,15 @@
                 class="col"
             >
                 <q-list style="max-Width: 400px;" :showing="!loading">
-                    <q-item v-for="place in filteredAndSortedData" :key="place.placeId" clickable v-ripple @click="openLocation(place.address)" style="user-select: none">
+                    <q-item
+                        v-for="place in filteredAndSortedData"
+                        :key="place.placeId"
+                        clickable
+                        v-ripple
+                        @click="openLocation(place.address)"
+                        :style="'background-image: url(' + place.thumbnail + ');'"
+                        :class="place.thumbnail != null ? 'explore-place-item-imagebg' : ''"
+                    >
                         <q-item-section side top>
                             <q-btn round color="white" icon="fas fa-info" clickable @click.stop="openDetails(place)" class="text-purple" size="10px"/>
                         </q-item-section>
@@ -123,7 +140,16 @@ export default {
                 return (!item.name.toLowerCase().indexOf(this.filterText.toLowerCase()));
             });
 
+            const activeThresholdTime = new Date();
+            // activeThresholdTime.setHours(activeThresholdTime.getHours() - 1);
+            activeThresholdTime.setMinutes(activeThresholdTime.getMinutes() - 15);
+
             switch (this.filterType) {
+            case 'active':
+                returnData = returnData.filter((item) => {
+                    return (new Date(item.current_last_update_time) > activeThresholdTime);
+                });
+                break;
             case 'favorite':
                 returnData = returnData.filter((item) => {
                     return (item.favorite);
