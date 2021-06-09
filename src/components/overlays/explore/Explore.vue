@@ -44,13 +44,25 @@
                     </template>
                 </q-input>
             </div>
+            <div class="row">
+                <div class="col q-pa-sm" style="text-align: right;">Show:</div>
+                <q-chip square clickable color="white" text-color="purple" :outline="filterType!=''" @click="setFilterType('')">
+                    All
+                </q-chip>
+                <q-chip square clickable color="white" text-color="purple" :outline="filterType!='favourite'" @click="setFilterType('favourite')">
+                    Favourites
+                </q-chip>
+                <q-chip square clickable color="white" text-color="purple" :outline="filterType!='populated'" @click="setFilterType('populated')">
+                    Populated
+                </q-chip>
+            </div>
             <q-scroll-area
                 class="col"
             >
                 <q-list style="max-Width: 400px;" :showing="!loading">
-                    <q-item v-for="place in filteredAndSortedData" :key="place.placeId" clickable v-ripple @click="openLocation(place.address)">
+                    <q-item v-for="place in filteredAndSortedData" :key="place.placeId" clickable v-ripple @click="openLocation(place.address)" style="user-select: none">
                         <q-item-section side top>
-                            <q-btn round color="white" icon="fas fa-info"  clickable @click.stop="openDetails(place)" class="text-purple" size="10px"/>
+                            <q-btn round color="white" icon="fas fa-info" clickable @click.stop="openDetails(place)" class="text-purple" size="10px"/>
                         </q-item-section>
 
                         <q-item-section top>
@@ -96,12 +108,32 @@ export default {
     data: () => ({
         placesList: [],
         loading: false,
-        filterText: ''
+        filterText: '',
+        filterType: ''
     }),
 
     computed: {
         filteredAndSortedData: function () {
             let returnData = this.placesList;
+
+            returnData = returnData.filter((item) => {
+                return (!item.name.toLowerCase().indexOf(this.filterText.toLowerCase()));
+            });
+
+            switch (this.filterType) {
+            case 'favourite':
+                returnData = returnData.filter((item) => {
+                    return (item.favourite);
+                });
+                break;
+            case 'populated':
+                returnData = returnData.filter((item) => {
+                    return (item.current_attendance > 0);
+                });
+                break;
+            default:
+                break;
+            }
 
             returnData = returnData.filter((item) => {
                 return (!item.name.toLowerCase().indexOf(this.filterText.toLowerCase()));
@@ -140,6 +172,14 @@ export default {
         },
 
         openDetails (place) {
+            alert('Not currently implemented: Show details - ' + place.name);
+        },
+
+        setFilterType (type) {
+            this.filterType = type;
+        },
+
+        toggleFavourite (place) {
             alert('Not currently implemented: Show details - ' + place.name);
         }
     },
