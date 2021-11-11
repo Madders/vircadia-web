@@ -18,22 +18,6 @@
     <q-layout class="full-height" id="mainLayout" view="lHh Lpr lFf">
         <q-header id="header" elevated>
             <div class="row no-wrap">
-<!--
-                <q-toolbar
-                    class="col-8"
-                >
-                    <q-input rounded outlined v-model="locationInput" class="q-mr-md" label="Connect to" />
-                    <q-btn-group push>
-                        <q-btn push label="Connect" icon="login" @click="connect" />
-                        <q-btn push label="Disconnect" icon="close" @click="disconnect" />
-                    </q-btn-group>
-                    <q-space />
-
-                    <div>
-                        <div>{{ $store.state.globalConsts.APP_NAME }}</div>
-                        <div>{{ $store.state.globalConsts.APP_VERSION_TAG }}</div>
-                    </div>
-                </q-toolbar> -->
                 <q-toolbar class="bg-dark text-white">
                     <q-btn
                         flat
@@ -181,12 +165,16 @@
                                 </q-item-section>
                             </q-item>
                             <q-separator inset spaced />
-                            <q-item-label header>About</q-item-label>
+                            <q-item-label header dense>About</q-item-label>
                             <q-item-label></q-item-label>
                             <q-item>
                                 <q-item-section>
                                     <q-item-label>{{ $store.state.globalConsts.APP_NAME }}</q-item-label>
                                     <q-item-label caption>{{ $store.state.globalConsts.APP_VERSION_TAG }}</q-item-label>
+                                </q-item-section>
+                            </q-item>
+                            <q-item>
+                                <q-item-section>
                                     <q-item-label>Vircadia Web SDK</q-item-label>
                                     <q-item-label caption>{{ $store.state.globalConsts.SDK_VERSION_TAG }}</q-item-label>
                                 </q-item-section>
