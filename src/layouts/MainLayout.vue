@@ -40,6 +40,18 @@
                         class="q-mr-sm q-ml-sm"
                     />
 
+                    <q-btn
+                        flat
+                        round
+                        dense
+                        fab-mini
+                        tooltip="mute/unmute mic"
+                        :icon="$store.state.audio.user.muted ? 'mic_off' : 'mic'"
+                        :color="$store.state.audio.user.hasInputAccess ? 'primary' : 'red'"
+                        @click="micToggled"
+                        class="q-mr-sm q-ml-sm"
+                    />
+
                     <q-toolbar-title>
                         <q-item-section>
                             <q-item-label>
@@ -217,6 +229,7 @@ import OverlayManager from "@Components/overlays/OverlayManager.vue";
 import { Store, Mutations as StoreMutations, Actions as StoreActions } from "@Store/index";
 import { Utility } from "@Modules/utility";
 import { Account } from "@Modules/account";
+import { AudioMgr } from "@Modules/scene/audio";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import Log from "@Modules/debugging/log";
@@ -238,31 +251,6 @@ export default defineComponent({
         return {
             // Toolbar
             locationInput: "",
-            // User Menu
-            userMenuOpen: false,
-            userMenu: [
-                {
-                    icon: "people",
-                    label: "People",
-                    link: "",
-                    isCategory: false,
-                    separator: true
-                },
-                {
-                    icon: "chat",
-                    label: "Chat",
-                    link: "ChatWindow",
-                    isCategory: false,
-                    separator: true
-                },
-                {
-                    icon: "travel_explore",
-                    label: "Explore",
-                    link: "",
-                    isCategory: false,
-                    separator: true
-                }
-            ],
             settingsMenu: [
                 {
                     icon: "headphones",
@@ -318,10 +306,7 @@ export default defineComponent({
         },
 
         getLocation: function(): string {
-            if (this.$store.state.location.current) {
-                return this.$store.state.location.current;
-            }
-            return "Not currently connected to a domain";
+            return this.$store.state.avatar.location ?? "Not currently connected to a domain";
         },
 
         // Displays the state of the domain server on the user interface
@@ -390,11 +375,11 @@ export default defineComponent({
             // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
             Log.info(Log.types.UI, `Connecting to...${locationAddress}`);
             // eslint-disable-next-line @typescript-eslint/unbound-method
-            await Utility.connectionSetup(locationAddress, Utility.defaultDomainOps, Utility.defaultMetaverseOps);
+            await Utility.connectionSetup(locationAddress);
         },
 
         disconnect: async function() {
-            Log.info(Log.types.UI, `Disconnecting from to...${this.$store.state.location.current}`);
+            Log.info(Log.types.UI, `Disconnecting from to...${this.$store.state.avatar.location}`);
             // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             await Utility.disconnectActiveDomain();
         },
@@ -452,6 +437,11 @@ export default defineComponent({
                 await this.connectToAddress(addressParam);
                 // eslint-disable-next-line @typescript-eslint/no-floating-promises
                 this.$router.push({ path: "/" });
+            }
+        },
+        micToggled: function() {
+            if (this.$store.state.audio.user.hasInputAccess === true) {
+                AudioMgr.muteAudio();
             }
         }
     },
