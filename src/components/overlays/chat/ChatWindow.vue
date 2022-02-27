@@ -44,6 +44,7 @@
                             :stamp="msgTime(msg)"
                             text-color="white"
                             bg-color="primary"
+                            text-html
                         >
                             <template v-slot:avatar>
                                 <q-avatar color="primary" size="32px">
@@ -79,6 +80,7 @@ import { AMessage, DomainMessage, FloofChatMessage } from "@Modules/domain/messa
 import { DomainMgr } from "@Modules/domain";
 import { QScrollArea } from "quasar";
 import { useStore } from "@Store/index";
+import { Linkify } from "@Modules/utility/linkify";
 
 // import Log from "@Modules/debugging/log";
 
@@ -200,14 +202,18 @@ export default defineComponent({
         // Return the text of the messsage.
         // This is where message format is checked. If FloofChat, use the text in the JSON packet
         msgText(pMsg: AMessage): string {
+            let message = "";
+
             if (pMsg.messageJSON) {
-                // eslint-disable-next-line max-len
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unnecessary-type-assertion
                 const fMsg = <FloofChatMessage>pMsg.messageJSON;
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-return,@typescript-eslint/no-unsafe-member-access
-                return fMsg.message;
+                message = fMsg.message;
+            } else {
+                message = pMsg.message;
             }
-            return pMsg.message;
+
+            // Check and reformat the message for hyperlinks etc
+
+            return Linkify.linkifyText(message);
         },
         // Return the printable time of the message.
         msgTime(pMsg: AMessage): string {

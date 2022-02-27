@@ -164,7 +164,7 @@
                                 <img :src="defaultProductLogo">
                             </q-avatar>
                         </template>
-                        <q-list>
+                        <q-list padding>
                             <q-item-label header>Help</q-item-label>
                             <q-item v-for="(menuItem, index) in helpMenu" :key="index"
                                 clickable
@@ -199,6 +199,10 @@
                                 <q-item-section>
                                     <q-item-label>{{ $store.state.globalConsts.APP_NAME }}</q-item-label>
                                     <q-item-label caption>{{ $store.state.globalConsts.APP_VERSION_TAG }}</q-item-label>
+                                </q-item-section>
+                            </q-item>
+                            <q-item>
+                                <q-item-section>
                                     <q-item-label>Vircadia Web SDK</q-item-label>
                                     <q-item-label caption>{{ $store.state.globalConsts.SDK_VERSION_TAG }}</q-item-label>
                                 </q-item-section>
