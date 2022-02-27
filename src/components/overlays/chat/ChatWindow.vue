@@ -31,6 +31,7 @@
             style="background: transparent; box-shadow: none;"
         >
             <q-scroll-area
+                ref="chatScrollArea"
                 class="col"
                 style="height: 100%"
             >
@@ -45,7 +46,7 @@
                             bg-color="primary"
                         >
                             <template v-slot:avatar>
-                                <q-avatar color="primary">
+                                <q-avatar color="primary" size="32px">
                                     <img v-if="getProfilePicture(msgSender(msg))" :src="getProfilePicture(msgSender(msg))">
                                     <span v-else>{{ msgSender(msg).charAt(0) }}</span>
                                 </q-avatar>
@@ -76,6 +77,8 @@ import OverlayShell from "../OverlayShell.vue";
 
 import { AMessage, DomainMessage, FloofChatMessage } from "@Modules/domain/message";
 import { DomainMgr } from "@Modules/domain";
+import { QScrollArea } from "quasar";
+import { useStore } from "@Store/index";
 
 // import Log from "@Modules/debugging/log";
 
@@ -92,6 +95,7 @@ export default defineComponent({
 
     data: () => ({
         messageInput: "",
+        store: useStore(),
         // The reason for using "self" instead of checking if the username matches our own
         // is because a user may write chat messages as a guest. Checking "displayName"
         // won"t help much either as anyone can choose any display name and cause confusion.
@@ -131,9 +135,19 @@ export default defineComponent({
     }),
 
     computed: {
+        count() {
+            return this.store.state.messages.messages.length;
+        }
     },
 
     watch: {
+        count: {
+            flush: "post",
+            handler() {
+                this.scrollChatToBottom();
+            }
+        }
+
         /*
         // When the message input changes, send the message
         messageInput: function(val: string): void {
@@ -156,6 +170,12 @@ export default defineComponent({
     },
 
     methods: {
+        scrollChatToBottom() {
+            const scrollArea = this.$refs.chatScrollArea as QScrollArea;
+
+            // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+            scrollArea.setScrollPercentage("vertical", 100);
+        },
         getProfilePicture(username: string): string | null {
             // Should store profile pictures after retrieving and then pull each
             // subsequent one from cache instead of hitting metaverse every time.
