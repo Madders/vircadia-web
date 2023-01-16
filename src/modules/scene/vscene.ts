@@ -33,6 +33,7 @@ import { DataMapper } from "@Modules/domain/dataMapper";
 import { AvatarStoreInterface } from "@Modules/avatar/StoreInterface";
 import { Store } from "@Base/store";
 import { CSS3DRenderer } from "./css3DRenderer";
+import { generateNametagTexture } from "@Modules/ui/nametag";
 
 // General Modules
 import Log from "@Modules/debugging/log";
@@ -360,22 +361,32 @@ export class VScene {
             this._onMyAvatarModelChangedObservable.notifyObservers(this._myAvatar);
 
             let nametag = undefined as Mesh | undefined;
-            if (Store.state.avatar.showNametags) {
+            if (Store.state.ui.nametags.show) {
                 nametag = this._loadNametag(this._myAvatar, Store.state.avatar.displayName);
             }
             // Update the nametag when the displayName is changed in the Store
             Store.watch((state) => state.avatar.displayName, (value: string) => {
                 if (nametag) {
                     this._unloadNametag(nametag);
-                    if (this._myAvatar && Store.state.avatar.showNametags) {
+                    if (this._myAvatar && Store.state.ui.nametags.show && Store.state.ui.nametags.showForSelf) {
                         nametag = this._loadNametag(this._myAvatar, value);
                     }
                 }
             });
-            // Show/Hide the nametag when showNametags is changed in the Store
-            Store.watch((state) => state.avatar.showNametags, (value: boolean) => {
+            // Show/Hide the nametag when nametags.show is changed in the Store
+            Store.watch((state) => state.ui.nametags.show, (value: boolean) => {
                 if (nametag) {
-                    if (value && this._myAvatar) { // Nametags are enabled
+                    if (value && this._myAvatar && Store.state.ui.nametags.showForSelf) { // Nametags are enabled
+                        nametag = this._loadNametag(this._myAvatar, Store.state.avatar.displayName);
+                    } else { // Nametags are disabled
+                        this._unloadNametag(nametag);
+                    }
+                }
+            });
+            // Show/Hide the nametag when nametags.showForSelf is changed in the Store
+            Store.watch((state) => state.ui.nametags.showForSelf, (value: boolean) => {
+                if (nametag) {
+                    if (value && this._myAvatar && Store.state.ui.nametags.show) { // Nametags are enabled
                         nametag = this._loadNametag(this._myAvatar, Store.state.avatar.displayName);
                     } else { // Nametags are disabled
                         this._unloadNametag(nametag);
@@ -415,7 +426,7 @@ export class VScene {
                 this._avatarList.set(id, avatar);
 
                 let nametag = undefined as Mesh | undefined;
-                if (Store.state.avatar.showNametags) {
+                if (Store.state.ui.nametags.show) {
                     nametag = this._loadNametag(avatar, domain.displayName);
                 }
                 // Update the nametag when the displayName is changed
@@ -423,13 +434,13 @@ export class VScene {
                     if (nametag) {
                         this._unloadNametag(nametag);
                         const nametagAvatar = this._avatarList.get(id);
-                        if (nametagAvatar && Store.state.avatar.showNametags) {
+                        if (nametagAvatar && Store.state.ui.nametags.show) {
                             nametag = this._loadNametag(nametagAvatar, domain.displayName);
                         }
                     }
                 });
                 // Show/Hide the nametag when showNametags is changed in the Store
-                Store.watch((state) => state.avatar.showNametags, (value: boolean) => {
+                Store.watch((state) => state.ui.nametags.show, (value: boolean) => {
                     if (nametag) {
                         const nametagAvatar = this._avatarList.get(id);
                         if (value && nametagAvatar) { // Nametags are enabled
@@ -465,36 +476,20 @@ export class VScene {
 
     // TODO: Move this code/set of code into its own module.
     private _loadNametag(avatar: GameObject, name: string) : Mesh {
-        const characterWidth = 38.5;
-        const tagWidth = (name.length + 2) * characterWidth;
-
-        // Texture.
-        const nametagTextureResolution = 100;
-        const nametagTexture = new DynamicTexture("NametagTexture", {
-            width: tagWidth,
-            height: nametagTextureResolution
-        }, this._scene);
-        nametagTexture.drawText(
-            name,
-            tagWidth / 2 - name.length / 2 * characterWidth, // Center the name on the tag.
-            70,
-            "70px monospace",
-            "white",
-            "#121212",
-            true,
-            true
-        );
+        const nametagTexture = generateNametagTexture(name, this._scene);
+        const aspectRatio = nametagTexture.getSize().width / nametagTexture.getSize().height;
 
         // Material.
         const nametagMaterial = new StandardMaterial("NametagMaterial", this._scene);
         nametagMaterial.diffuseTexture = nametagTexture;
+        nametagMaterial.diffuseTexture.hasAlpha = true;
         nametagMaterial.specularTexture = nametagTexture;
         nametagMaterial.emissiveTexture = nametagTexture;
         nametagMaterial.disableLighting = true;
 
         // Mesh.
         const nametagPlane = MeshBuilder.CreatePlane("Nametag", {
-            width: 0.1 * tagWidth / nametagTextureResolution,
+            width: 0.1 * aspectRatio,
             height: 0.1,
             sideOrientation: Mesh.DOUBLESIDE,
             updatable: true

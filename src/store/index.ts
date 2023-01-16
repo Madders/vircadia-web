@@ -278,7 +278,6 @@ export interface IRootState {
     // Information about my avatar. Updated when avatar attributes change
     avatar: {
         displayName: string,
-        showNametags: boolean,
         position: vec3,
         location: string,   // displayable, string form of position coordinates
         models: AvatarEntryMap,
@@ -401,6 +400,15 @@ export interface IRootState {
         other: {
             [key: string]: ControlKeybind
         }
+    },
+    // UI Configuration
+    ui: {
+        nametags: {
+            show: boolean;
+            showForSelf: boolean;
+            style: string;
+            resolution: number
+        }
     }
 }
 
@@ -451,7 +459,6 @@ const storeDefaults = {
     },
     avatar: {
         displayName: "anonymous",
-        showNametags: true,
         position: Vec3.ZERO,
         location: "0,0,0",
         models: defaultAvatarModels(),
@@ -592,6 +599,15 @@ const storeDefaults = {
             resetPosition: { name: "Reset Position", keybind: "KeyK" },
             toggleMenu: { name: "Toggle Menu", keybind: "KeyM" },
             openChat: { name: "Open Chat", keybind: "KeyT" }
+        }
+    },
+    // UI Configuration
+    ui: {
+        nametags: {
+            show: true,
+            showForSelf: true,
+            style: "basic",
+            resolution: 100
         }
     }
 } as IRootState;

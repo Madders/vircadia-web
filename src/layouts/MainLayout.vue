@@ -558,13 +558,15 @@ export default defineComponent({
                 {
                     icon: "badge",
                     label: "Nametags",
+                    /*
                     action: () => {
                         this.$store.commit(StoreMutations.MUTATE, {
-                            property: "avatar.showNametags",
-                            value: !this.$store.state.avatar.showNametags
+                            property: "state.ui.nametags.show",
+                            value: !this.$store.state.ui.nametags.show
                         });
                         Log.info(Log.types.OTHER, "Toggle Avatar Nametags");
                     },
+                    */
                     isCategory: false,
                     separator: true,
                     caption: "nametag_setting"
@@ -798,7 +800,7 @@ export default defineComponent({
         formatMenuItemCaption: function(caption: string) {
             switch (caption) {
                 case "nametag_setting":
-                    return this.$store.state.avatar.showNametags ? "On" : "Off";
+                    return this.$store.state.ui.nametags.show ? "On" : "Off";
                 default:
                     return caption;
             }
